@@ -2,7 +2,7 @@
   "name": "chatbot",
   "version": "0.1.0",
   "private": true,
-  "description": "Chatbot sample app for Grok Voice skills. Extracted from ericzakariasson/grok-http examples/chat. Not an official xAI app.",
+  "description": "Chatbot webapp",
   "license": "MIT",
   "engines": {
     "node": ">=22"
@@ -16,11 +16,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test test/protocol.test.ts"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@shadcn/react": "^0.3.0",
-    "@xai/sdk": "github:ericzakariasson/grok-http",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.33.0",

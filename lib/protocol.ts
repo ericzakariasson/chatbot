@@ -1,4 +1,4 @@
-import type { InputItem } from "@xai/sdk"
+import type { InputItem } from "@/lib/xai"
 
 /** UI transcript row. Not the Responses API item shape. */
 export type ChatMessage = {

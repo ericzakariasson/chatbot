@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react"
-import type { InputItem } from "@xai/sdk"
+import type { InputItem } from "@/lib/xai"
 import { ArrowUpIcon, MessageCircleDashedIcon, SquareIcon } from "lucide-react"
 
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -175,7 +175,7 @@ export function ChatApp() {
             <div className="flex min-w-0 flex-col gap-0.5">
               <h1 className="text-sm font-medium">Grok</h1>
               <p className="text-xs text-muted-foreground">
-                Chat demo for @xai/sdk. Not an official xAI app.
+                Streaming chat.
               </p>
             </div>
             <ThemeToggle />
@@ -191,7 +191,7 @@ export function ChatApp() {
                 </EmptyMedia>
                 <EmptyTitle>Ask Grok…</EmptyTitle>
                 <EmptyDescription>
-                  Messages stream from this repo’s @xai/sdk Responses client.
+                  Messages stream as they arrive.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

@@ -1,4 +1,4 @@
-import { models, Xai, type InputItem } from "@xai/sdk"
+import { models, Xai, type InputItem } from "@/lib/xai"
 
 import {
   mapSdkEvent,
