@@ -336,11 +336,12 @@ export class Xai {
     })
 
     if (!response.ok) {
-      let parsed: unknown
+      const text = await response.text().catch(() => "")
+      let parsed: unknown = text
       try {
-        parsed = await response.json()
+        parsed = text ? JSON.parse(text) : text
       } catch {
-        parsed = await response.text().catch(() => "")
+        parsed = text
       }
       throw new Error(errorMessage(parsed, response.statusText || `HTTP ${response.status}`))
     }
