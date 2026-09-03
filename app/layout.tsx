@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Chatbot",
-  description: "Streaming Grok chat. Extracted from grok-http examples/chat. Not an official xAI app.",
+  description: "Chatbot webapp",
 }
 
 const themeInitScript = `(function(){try{var stored=localStorage.getItem("grok-chat-theme");var theme=stored==="dark"||stored==="light"?stored:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(theme==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`
