@@ -1,11 +1,11 @@
-import { Loader2Icon } from "lucide-react"
+import { CircleNotchIcon } from "@phosphor-icons/react"
 import type { ComponentProps } from "react"
 
 import { cn } from "@/lib/utils"
 
 function Spinner({ className, ...props }: ComponentProps<"svg">) {
   return (
-    <Loader2Icon
+    <CircleNotchIcon
       data-slot="spinner"
       role="status"
       aria-label="Loading"

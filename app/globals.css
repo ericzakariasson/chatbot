@@ -140,4 +140,22 @@
 .style-nova [data-chat-composer] {
   height: auto;
   min-height: 4.5rem;
+  border-radius: var(--radius-2xl);
+  background-color: var(--background);
+  opacity: 1;
+}
+
+.style-nova [data-chat-composer] [data-slot="button"],
+.style-nova [data-chat-composer] [data-slot="dropdown-menu-trigger"] {
+  border-radius: 9999px;
+}
+
+.style-nova [data-slot="bubble-content"] {
+  border-radius: var(--radius-3xl);
+}
+
+.style-nova [data-chat-composer] [data-slot="input-group-control"] {
+  min-height: 2.25rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.25rem;
 }

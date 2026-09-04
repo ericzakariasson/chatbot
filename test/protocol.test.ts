@@ -19,6 +19,15 @@ describe("protocol", () => {
       type: "delta",
       text: "Hel",
     })
+    assert.deepEqual(mapSdkEvent({ type: "response.reasoning_text.delta", delta: "Let" }), {
+      type: "thinking",
+      text: "Let",
+    })
+    assert.deepEqual(
+      mapSdkEvent({ type: "response.reasoning_summary_text.delta", delta: " me" }),
+      { type: "thinking", text: " me" },
+    )
+    assert.equal(mapSdkEvent({ type: "response.reasoning_text.done", text: "Let me" }), null)
     assert.equal(mapSdkEvent({ type: "response.created" }), null)
     assert.deepEqual(mapSdkEvent({ type: "error", message: "overloaded" }), {
       type: "error",

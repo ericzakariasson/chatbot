@@ -5,12 +5,14 @@ export type ChatMessage = {
   id: string
   role: "user" | "assistant"
   content: string
+  thinking?: string
 }
 
 /**
  * NDJSON wire format between `POST /api/chat` and the browser.
  * One JSON object per line. Keep this tiny; do not stream raw SDK events.
  *
+ *   { "type": "thinking", "text": "..." }
  *   { "type": "delta", "text": "..." }
  *   { "type": "done", "usage"?: UsageSummary, "requestId"?: string | null, "toInput"?: InputItem[] }
  *   { "type": "error", "message": "..." }
@@ -22,6 +24,7 @@ export type UsageSummary = {
   cost_usd: number | null
 }
 
+export type WireThinking = { type: "thinking"; text: string }
 export type WireDelta = { type: "delta"; text: string }
 export type WireDone = {
   type: "done"
@@ -30,7 +33,7 @@ export type WireDone = {
   toInput?: InputItem[]
 }
 export type WireError = { type: "error"; message: string }
-export type WireEvent = WireDelta | WireDone | WireError
+export type WireEvent = WireThinking | WireDelta | WireDone | WireError
 
 export type ChatRequestBody = {
   /** Preferred: accumulated Responses `input` for the next turn. */
@@ -82,6 +85,13 @@ export function accumulateAfterTurn(
 }
 
 export function mapSdkEvent(event: SdkLikeEvent): WireEvent | null {
+  if (
+    event.type === "response.reasoning_text.delta" ||
+    event.type === "response.reasoning_summary_text.delta"
+  ) {
+    if (typeof event.delta !== "string" || event.delta.length === 0) return null
+    return { type: "thinking", text: event.delta }
+  }
   if (event.type === "response.output_text.delta") {
     if (typeof event.delta !== "string" || event.delta.length === 0) return null
     return { type: "delta", text: event.delta }
@@ -107,7 +117,7 @@ export function parseWireLine(line: string): WireEvent | null {
   const value = JSON.parse(trimmed) as unknown
   if (!value || typeof value !== "object") return null
   const rec = value as { type?: unknown }
-  if (rec.type === "delta" || rec.type === "done" || rec.type === "error") {
+  if (rec.type === "thinking" || rec.type === "delta" || rec.type === "done" || rec.type === "error") {
     return value as WireEvent
   }
   return null

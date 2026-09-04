@@ -1,8 +1,18 @@
 "use client"
 
-import { useRef, useState, type FormEvent, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react"
 import type { InputItem } from "@/lib/xai"
-import { ArrowUpIcon, MessageCircleDashedIcon, SquareIcon } from "lucide-react"
+import {
+  ArrowUpIcon,
+  BinocularsIcon,
+  CaretRightIcon,
+  ChatCircleDotsIcon,
+  GlobeIcon,
+  ImageIcon,
+  PaperclipIcon,
+  PlusIcon,
+  SquareIcon,
+} from "@phosphor-icons/react"
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { readChatStream } from "@/lib/client-stream"
@@ -10,13 +20,19 @@ import {
   accumulateAfterTurn,
   buildNextInput,
   type ChatMessage,
-  type UsageSummary,
   type WireEvent,
 } from "@/lib/protocol"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Empty,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -27,7 +43,7 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
+import { Marker, MarkerContent } from "@/components/ui/marker"
 import { Message, MessageContent } from "@/components/ui/message"
 import {
   MessageScroller,
@@ -37,22 +53,57 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
-import { Spinner } from "@/components/ui/spinner"
 
 type Status = "ready" | "submitted" | "streaming"
 
-function newId(): string {
-  return crypto.randomUUID()
+function ThinkingTrace({
+  text,
+  active,
+}: {
+  text: string
+  active: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const bodyRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open || !bodyRef.current) return
+    bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+  }, [text, open])
+
+  const label = active ? "Thinking" : "Thought"
+
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-1.5">
+      <button
+        type="button"
+        className="group/thought flex w-fit items-center gap-1 text-sm text-muted-foreground"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className={active ? "shimmer" : undefined}>{label}</span>
+        <CaretRightIcon
+          className={
+            open
+              ? "rotate-90 opacity-0 transition-all group-hover/thought:opacity-100"
+              : "opacity-0 transition-all group-hover/thought:opacity-100"
+          }
+        />
+      </button>
+      {open ? (
+        <div
+          ref={bodyRef}
+          className="max-h-40 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground"
+        >
+          {text || (active ? "…" : "")}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
-function formatUsage(usage: UsageSummary | null, requestId: string | null): string {
-  const parts = ["grok-4.6"]
-  if (requestId) parts.push(requestId)
-  if (usage) {
-    parts.push(`${usage.total_tokens} tokens`)
-    if (usage.cost_usd != null) parts.push(`$${usage.cost_usd.toFixed(6)}`)
-  }
-  return parts.join(" · ")
+function newId(): string {
+  return crypto.randomUUID()
 }
 
 export function ChatApp() {
@@ -60,8 +111,6 @@ export function ChatApp() {
   const [draft, setDraft] = useState("")
   const [status, setStatus] = useState<Status>("ready")
   const [error, setError] = useState<string | null>(null)
-  const [usage, setUsage] = useState<UsageSummary | null>(null)
-  const [requestId, setRequestId] = useState<string | null>(null)
   const priorInputRef = useRef<InputItem[] | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -115,7 +164,16 @@ export function ChatApp() {
 
       let sawDelta = false
       await readChatStream(response, (event) => {
-        if (event.type === "delta") {
+        if (event.type === "thinking") {
+          setStatus("streaming")
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantMessage.id
+                ? { ...message, thinking: `${message.thinking ?? ""}${event.text}` }
+                : message,
+            ),
+          )
+        } else if (event.type === "delta") {
           sawDelta = true
           setStatus("streaming")
           setMessages((current) =>
@@ -126,8 +184,6 @@ export function ChatApp() {
             ),
           )
         } else if (event.type === "done") {
-          if (event.usage) setUsage(event.usage)
-          if (event.requestId !== undefined) setRequestId(event.requestId ?? null)
           priorInputRef.current = accumulateAfterTurn(input, event.toInput)
         } else if (event.type === "error") {
           setError(event.message)
@@ -165,34 +221,24 @@ export function ChatApp() {
     }
   }
 
-  const showThinking = status === "submitted"
-
   return (
     <MessageScrollerProvider autoScroll>
       <div className="flex h-dvh min-h-0 flex-col bg-background">
-        <header className="shrink-0 border-b bg-background">
+        <header className="shrink-0 bg-background">
           <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <h1 className="text-sm font-medium">Grok</h1>
-              <p className="text-xs text-muted-foreground">
-                Streaming chat.
-              </p>
-            </div>
+            <h1 className="text-sm font-medium">Grok</h1>
             <ThemeToggle />
           </div>
         </header>
 
-        <div className="min-h-0 flex-1">
+        <div className="relative min-h-0 flex-1">
           {messages.length === 0 ? (
             <Empty className="mx-auto h-full max-w-3xl px-4">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <MessageCircleDashedIcon />
+                  <ChatCircleDotsIcon />
                 </EmptyMedia>
                 <EmptyTitle>Ask Grok…</EmptyTitle>
-                <EmptyDescription>
-                  Messages stream as they arrive.
-                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
@@ -200,7 +246,7 @@ export function ChatApp() {
               <MessageScrollerViewport>
                 <MessageScrollerContent
                   aria-busy={isBusy}
-                  className="mx-auto w-full max-w-3xl px-4 py-6"
+                  className="mx-auto w-full max-w-3xl px-4 pt-6 pb-40"
                 >
                   {messages.map((message) => (
                     <MessageScrollerItem
@@ -211,29 +257,29 @@ export function ChatApp() {
                       <Message align={message.role === "user" ? "end" : "start"}>
                         <MessageContent>
                           {message.role === "assistant" &&
-                          message.content.length === 0 &&
-                          isBusy ? null : (
+                          (message.thinking ||
+                            (message.content.length === 0 && isBusy)) ? (
+                            <ThinkingTrace
+                              text={message.thinking ?? ""}
+                              active={
+                                isBusy &&
+                                message.content.length === 0 &&
+                                message.id === messages[messages.length - 1]?.id
+                              }
+                            />
+                          ) : null}
+                          {message.content.length > 0 ? (
                             <Bubble
                               align={message.role === "user" ? "end" : "start"}
-                              variant={message.role === "user" ? "default" : "secondary"}
+                              variant={message.role === "user" ? "secondary" : "ghost"}
                             >
-                              <BubbleContent>{message.content}</BubbleContent>
+                              <BubbleContent className="rounded-3xl">{message.content}</BubbleContent>
                             </Bubble>
-                          )}
+                          ) : null}
                         </MessageContent>
                       </Message>
                     </MessageScrollerItem>
                   ))}
-                  {showThinking ? (
-                    <MessageScrollerItem scrollAnchor={false}>
-                      <Marker role="status">
-                        <MarkerIcon>
-                          <Spinner />
-                        </MarkerIcon>
-                        <MarkerContent className="shimmer">Thinking…</MarkerContent>
-                      </Marker>
-                    </MessageScrollerItem>
-                  ) : null}
                   {error ? (
                     <MessageScrollerItem scrollAnchor={false}>
                       <Marker role="status">
@@ -243,17 +289,16 @@ export function ChatApp() {
                   ) : null}
                 </MessageScrollerContent>
               </MessageScrollerViewport>
-              <MessageScrollerButton />
+              <MessageScrollerButton className="data-[direction=end]:bottom-40" />
             </MessageScroller>
           )}
-        </div>
 
-        <footer className="shrink-0 border-t bg-background">
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-4 py-3">
+          <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background from-55% to-transparent pt-10">
+            <div className="pointer-events-auto mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-4 pb-3">
             <form onSubmit={onSubmit}>
               <InputGroup
                 data-chat-composer
-                className="h-auto min-h-16 rounded-xl"
+                className="h-auto overflow-hidden rounded-2xl bg-background shadow-sm"
               >
                 <InputGroupTextarea
                   value={draft}
@@ -263,15 +308,55 @@ export function ChatApp() {
                   disabled={false}
                   rows={1}
                   aria-label="Message"
-                  className="min-h-16 px-3 py-3"
+                  className="px-4"
                 />
-                <InputGroupAddon align="block-end" className="justify-end">
+                <InputGroupAddon align="block-end" className="px-2.5 pb-2.5">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <InputGroupButton
+                        aria-label="Add files"
+                        type="button"
+                        size="icon-sm"
+                        variant="secondary"
+                        className="rounded-full"
+                      >
+                        <PlusIcon />
+                      </InputGroupButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      side="top"
+                      className="w-44"
+                    >
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <PaperclipIcon />
+                          Add Photos & Files
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <ImageIcon />
+                          Create Image
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <BinocularsIcon />
+                          Deep Research
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <GlobeIcon />
+                          Web Search
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   {isBusy ? (
                     <InputGroupButton
                       type="button"
                       variant="default"
                       size="icon-sm"
-                      className="rounded-full"
+                      className="ml-auto rounded-full"
                       aria-label="Stop"
                       onClick={stop}
                     >
@@ -282,21 +367,19 @@ export function ChatApp() {
                       type="submit"
                       variant="default"
                       size="icon-sm"
-                      className="rounded-full"
+                      className="ml-auto rounded-full"
                       aria-label="Send"
-                      disabled={draft.trim().length === 0}
                     >
                       <ArrowUpIcon />
+                      <span className="sr-only">Send</span>
                     </InputGroupButton>
                   )}
                 </InputGroupAddon>
               </InputGroup>
             </form>
-            <p className="text-center text-[11px] leading-none text-muted-foreground">
-              {formatUsage(usage, requestId)}
-            </p>
-          </div>
-        </footer>
+            </div>
+          </footer>
+        </div>
       </div>
     </MessageScrollerProvider>
   )
