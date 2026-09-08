@@ -159,3 +159,111 @@
   padding-top: 0.75rem;
   padding-bottom: 0.25rem;
 }
+
+/* Markdown rendering for assistant replies */
+.markdown {
+  @apply min-w-0 text-sm leading-relaxed wrap-break-word;
+}
+
+.markdown > * + * {
+  @apply mt-3;
+}
+
+.markdown p {
+  @apply whitespace-pre-wrap;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  @apply font-semibold leading-snug;
+}
+
+.markdown h1 {
+  @apply text-xl;
+}
+
+.markdown h2 {
+  @apply text-lg;
+}
+
+.markdown h3 {
+  @apply text-base;
+}
+
+.markdown > * + :is(h1, h2, h3, h4, h5, h6) {
+  @apply mt-5;
+}
+
+.markdown a {
+  @apply text-foreground underline underline-offset-4 decoration-muted-foreground/60 hover:decoration-foreground;
+}
+
+.markdown strong {
+  @apply font-semibold;
+}
+
+.markdown ul,
+.markdown ol {
+  @apply my-3 flex flex-col gap-1 pl-6;
+}
+
+.markdown ul {
+  @apply list-disc;
+}
+
+.markdown ol {
+  @apply list-decimal;
+}
+
+.markdown li > :is(ul, ol) {
+  @apply my-1;
+}
+
+.markdown li::marker {
+  @apply text-muted-foreground;
+}
+
+.markdown blockquote {
+  @apply border-l-2 border-border pl-3 text-muted-foreground;
+}
+
+.markdown hr {
+  @apply my-5 border-border;
+}
+
+.markdown code {
+  @apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em];
+}
+
+.markdown pre {
+  @apply overflow-x-auto rounded-xl bg-muted p-3 text-[0.85em] leading-relaxed;
+}
+
+.markdown pre code {
+  @apply rounded-none bg-transparent p-0 text-inherit;
+}
+
+.markdown table {
+  @apply block w-fit max-w-full overflow-x-auto border-collapse text-left;
+}
+
+.markdown th,
+.markdown td {
+  @apply border border-border px-3 py-1.5 align-top;
+}
+
+.markdown th {
+  @apply bg-muted font-semibold;
+}
+
+.markdown img {
+  @apply max-w-full rounded-xl;
+}
+
+.markdown input[type="checkbox"] {
+  @apply mr-1.5 align-middle;
+}

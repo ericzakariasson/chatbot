@@ -6,7 +6,6 @@ import {
   ArrowUpIcon,
   BinocularsIcon,
   CaretRightIcon,
-  ChatCircleDotsIcon,
   GlobeIcon,
   ImageIcon,
   PaperclipIcon,
@@ -14,6 +13,7 @@ import {
   SquareIcon,
 } from "@phosphor-icons/react"
 
+import { Markdown } from "@/components/markdown"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { readChatStream } from "@/lib/client-stream"
 import {
@@ -31,12 +31,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyContent } from "@/components/ui/empty"
 import {
   InputGroup,
   InputGroupAddon,
@@ -55,6 +51,12 @@ import {
 } from "@/components/ui/message-scroller"
 
 type Status = "ready" | "submitted" | "streaming"
+
+const SUGGESTIONS = [
+  "Explain how transformers work in two paragraphs",
+  "Draft a polite reply declining a meeting",
+  "Give me three ideas for a weekend project",
+]
 
 function ThinkingTrace({
   text,
@@ -234,12 +236,22 @@ export function ChatApp() {
         <div className="relative min-h-0 flex-1">
           {messages.length === 0 ? (
             <Empty className="mx-auto h-full max-w-3xl px-4">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ChatCircleDotsIcon />
-                </EmptyMedia>
-                <EmptyTitle>Ask Grok…</EmptyTitle>
-              </EmptyHeader>
+              <EmptyContent>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {SUGGESTIONS.map((suggestion) => (
+                    <Button
+                      key={suggestion}
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto whitespace-normal rounded-full px-3 py-1 text-sm font-normal text-muted-foreground/70 hover:text-foreground"
+                      onClick={() => void send(suggestion)}
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              </EmptyContent>
             </Empty>
           ) : (
             <MessageScroller>
@@ -273,7 +285,13 @@ export function ChatApp() {
                               align={message.role === "user" ? "end" : "start"}
                               variant={message.role === "user" ? "secondary" : "ghost"}
                             >
-                              <BubbleContent className="rounded-3xl">{message.content}</BubbleContent>
+                              <BubbleContent className="rounded-3xl">
+                                {message.role === "assistant" ? (
+                                  <Markdown>{message.content}</Markdown>
+                                ) : (
+                                  message.content
+                                )}
+                              </BubbleContent>
                             </Bubble>
                           ) : null}
                         </MessageContent>
@@ -304,7 +322,7 @@ export function ChatApp() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={onKeyDown}
-                  placeholder="Ask Grok…"
+                  placeholder="What's on your mind?"
                   disabled={false}
                   rows={1}
                   aria-label="Message"
@@ -318,7 +336,7 @@ export function ChatApp() {
                         type="button"
                         size="icon-sm"
                         variant="secondary"
-                        className="rounded-full"
+                        className="size-7! rounded-full"
                       >
                         <PlusIcon />
                       </InputGroupButton>
@@ -356,7 +374,7 @@ export function ChatApp() {
                       type="button"
                       variant="default"
                       size="icon-sm"
-                      className="ml-auto rounded-full"
+                      className="ml-auto size-7! rounded-full"
                       aria-label="Stop"
                       onClick={stop}
                     >
@@ -367,7 +385,7 @@ export function ChatApp() {
                       type="submit"
                       variant="default"
                       size="icon-sm"
-                      className="ml-auto rounded-full"
+                      className="ml-auto size-7! rounded-full"
                       aria-label="Send"
                     >
                       <ArrowUpIcon />
