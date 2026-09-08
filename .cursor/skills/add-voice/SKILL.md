@@ -52,8 +52,8 @@ Language-agnostic event loop. **TypeScript samples default.** Short Python twins
    - On function tools: `function_call_output`, finish playback, then `response.create`.
 
 5. **Composer UI convention**
-   - One primary button, right side of the composer. Empty composer → filled **waveform** icon, starts voice mode. Any text present → classic **send** arrow; in voice mode that text goes into the live session (`conversation.item.create` + `response.create`). Text reply streaming → stop square.
-   - While voice is live the same button shows an **animated waveform** (a few bars) and ends the session on click. Phase drives the animation: listening slow, speaking fast, connecting/thinking dimmed. Honor `prefers-reduced-motion`. No X button, no pulsing ring.
+   - One primary button, right side of the composer. Empty composer → **waveform** icon (stroked, e.g. Phosphor `WaveformIcon weight="bold"`; never the `fill` weight, which renders as a blob at 16 px), starts voice mode. Any text present → classic **send** arrow; in voice mode that text goes into the live session (`conversation.item.create` + `response.create`). Text reply streaming → stop square.
+   - While voice is live the same button shows an **animated waveform** (4 bars, ~3 px wide, 2 px gap, ~16 px tall, min scale 0.4 so they stay legible in a 28 px button) and ends the session on click. Phase drives the animation: listening slow, speaking fast, connecting/thinking slower and slightly dimmed (opacity ≥ 0.75). Honor `prefers-reduced-motion`. No X button, no pulsing ring.
    - Status lives **in the composer, not around it**: the placeholder reads `Connecting…` / `Listening…` / `Thinking…` / `Speaking…`, plus an `sr-only` `role="status"`. No separate status row.
    - The **microphone icon is reserved for dictation** (`/add-dictation`). Never use it for voice mode.
 
