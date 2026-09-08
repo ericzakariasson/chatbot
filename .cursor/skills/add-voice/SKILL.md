@@ -5,8 +5,7 @@ description: >-
   realtime voice to an app, including replacing an STT-LLM-TTS cascade or
   OpenAI Realtime.   Wire speech-to-speech, safe auth, and app mic. Composer: waveform button,
   mic icon reserved for dictation. For mic-to-text only use /add-dictation; to speak text replies use
-  /add-read-aloud. To add debug logging and fix from logs use /debug-voice;
-  to bring an integration up to the latest API use /upgrade-voice-mode.
+  /add-read-aloud. To add debug logging and fix from logs use /debug-voice.
 ---
 
 # Add Voice

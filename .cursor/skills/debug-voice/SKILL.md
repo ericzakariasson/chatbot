@@ -6,7 +6,7 @@ description: >-
   has no debug logging yet. Proposes a plan, then installs a dev-only log
   pipeline (client logger → local NDJSON) in the app's own language and
   conventions, then runs the fix loop: match the user's report to log
-  signatures, fix one thing, re-test. For the latest API use /upgrade-voice-mode.
+  signatures, fix one thing, re-test.
 ---
 
 # Debug Voice
