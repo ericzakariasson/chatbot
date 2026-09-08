@@ -13,6 +13,7 @@ import {
   SquareIcon,
 } from "@phosphor-icons/react"
 
+import { Markdown } from "@/components/markdown"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { readChatStream } from "@/lib/client-stream"
 import {
@@ -284,7 +285,13 @@ export function ChatApp() {
                               align={message.role === "user" ? "end" : "start"}
                               variant={message.role === "user" ? "secondary" : "ghost"}
                             >
-                              <BubbleContent className="rounded-3xl">{message.content}</BubbleContent>
+                              <BubbleContent className="rounded-3xl">
+                                {message.role === "assistant" ? (
+                                  <Markdown>{message.content}</Markdown>
+                                ) : (
+                                  message.content
+                                )}
+                              </BubbleContent>
                             </Bubble>
                           ) : null}
                         </MessageContent>
